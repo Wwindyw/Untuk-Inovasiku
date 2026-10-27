@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>METRIKS G-MAPS - Rasio & Skala | SMP PGRI 01 BATU</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- GeoGebra Web API -->
+    <script src="https://www.geogebra.org/apps/deployggb.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        },
+                        batu: {
+                            green: '#10b981',
+                            apple: '#84cc16',
+                            orange: '#f97316'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-heading { font-family: 'Outfit', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #10b981 100%);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER NAVBAR -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center text-white shadow-md font-bold text-xl">
+                    <i class="fa-solid fa-shapes"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading font-bold text-lg text-slate-900 leading-tight">METRIKS G-MAPS <span class="text-xs font-normal text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">SMP PGRI 01 BATU</span></h1>
+                    <p class="text-xs text-slate-500">Rasio & Skala dengan Deep Learning</p>
+                </div>
+            </div>
+
+            <!-- User Status & Action Buttons -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <div id="userBadge" class="hidden flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+                    <div id="userAvatar" class="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs font-bold">S</div>
+                    <span id="userNameDisplay" class="text-xs sm:text-sm font-semibold text-slate-700">Siswa</span>
+                    <span id="userRoleBadge" class="text-[10px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full font-semibold">Murid</span>
+                </div>
+                <button id="logoutBtn" onclick="logout()" class="hidden text-xs sm:text-sm bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold px-3 py-1.5 rounded-lg border border-rose-200 transition-all">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- ================= LOGIN SCREEN ================= -->
+        <section id="loginScreen" class="max-w-md mx-auto my-8">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 text-center relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-32 h-32 bg-sky-100 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-emerald-100 rounded-full blur-2xl"></div>
+
+                <div class="relative z-10">
+                    <div class="w-16 h-16 rounded-2xl gradient-bg mx-auto flex items-center justify-center text-white text-2xl shadow-lg mb-4">
+                        <i class="fa-solid fa-compass-drafting"></i>
+                    </div>
+                    <h2 class="font-heading text-2xl font-bold text-slate-900 mb-1">Selamat Datang!</h2>
+                    <p class="text-xs text-slate-500 mb-6">Pembelajaran Matematika Interaktif SMP PGRI 01 BATU</p>
+
+                    <!-- Toggle Role Login -->
+                    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl mb-6">
+                        <button id="tabBtnSiswa" onclick="toggleLoginRole('siswa')" class="py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all bg-white text-slate-800 shadow-sm">
+                            <i class="fa-solid fa-user-graduate mr-1"></i> Login Siswa
+                        </button>
+                        <button id="tabBtnGuru" onclick="toggleLoginRole('guru')" class="py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-500 transition-all hover:text-slate-800">
+                            <i class="fa-solid fa-chalkboard-user mr-1"></i> Login Guru
+                        </button>
+                    </div>
+
+                    <!-- Form Siswa -->
+                    <form id="formSiswa" onsubmit="handleLoginSiswa(event)" class="space-y-4 text-left">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Siswa</label>
+                            <input type="text" id="inputNamaSiswa" required placeholder="Contoh: Ahmad Rizky" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Kelas / No. Absen</label>
+                            <input type="text" id="inputKelasSiswa" required placeholder="Contoh: VII-A / 12" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm outline-none transition-all">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                            <span>Mulai Belajar Sekarang</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </form>
+
+                    <!-- Form Guru -->
+                    <form id="formGuru" onsubmit="handleLoginGuru(event)" class="space-y-4 text-left hidden">
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex items-start space-x-2">
+                            <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
+                            <span>Portal Khusus Guru Pengampu: <strong>Windy Tunas Putri</strong> (SMP PGRI 01 BATU)</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Username Guru</label>
+                            <input type="text" id="inputUserGuru" value="buwindy" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi</label>
+                            <input type="password" id="inputPassGuru" value="batu2026" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 text-sm outline-none">
+                            <p class="text-[10px] text-slate-400 mt-1">*Default password: batu2026</p>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-lock-open text-xs"></i>
+                            <span>Masuk Dashboard Guru</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MAIN DASHBOARD CONTAINER ================= -->
+        <div id="appContent" class="hidden">
+
+            <!-- NAVIGATION TABS -->
+            <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-3 no-print">
+                <button id="navKonsep" onclick="switchTab('konsep')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-sky-600 text-white shadow-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>1. Konsep Bermakna</span>
+                </button>
+                <button id="navSimulasi" onclick="switchTab('simulasi')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>2. Simulasi Skala</span>
+                </button>
+                <button id="navGeogebra" onclick="switchTab('geogebra')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 flex items-center space-x-2">
+                    <i class="fa-solid fa-draw-polygon text-purple-600"></i>
+                    <span>3. Lab GeoGebra</span>
+                </button>
+                <button id="navTantangan" onclick="switchTab('tantangan')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 flex items-center space-x-2">
+                    <i class="fa-solid fa-brain text-amber-500"></i>
+                    <span>4. Tantangan Reflektif</span>
+                </button>
+            </div>
+
+            <!-- TAB 1: KONSEP BERMAKNA (MEANINGFUL LEARNING) -->
+            <div id="tabKonsep" class="tab-pane space-y-6">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-sky-600 to-emerald-600 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+                    <div class="relative z-10 max-w-3xl">
+                        <span class="bg-white/20 backdrop-blur-md text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3 inline-block">Deep Learning: Meaningful Learning</span>
+                        <h2 class="font-heading text-2xl sm:text-3xl font-bold mb-2">Memahami Rasio & Skala di Sekitar Kota Batu 🍎</h2>
+                        <p class="text-sm sm:text-base text-sky-100 leading-relaxed">
+                            Matematika bukan sekadar rumus hafalan! Rasio membandingkan dua besaran, sedangkan Skala membantu kita menggambar wilayah luas Kota Batu atau denah sekolah SMP PGRI 01 BATU dalam ukuran yang muat di kertas.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 3 Konteks Nyata Batu -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Case 1: Peta Wisata Batu -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                            </div>
+                            <h3 class="font-heading font-bold text-lg text-slate-800 mb-2">1. Skala Peta Kota Batu</h3>
+                            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                                Jika peta Kota Batu menggunakan skala <strong>1 : 50.000</strong>, artinya <strong>1 cm</strong> pada peta mewakili <strong>50.000 cm (500 meter)</strong> jarak sebenarnya di lapangan.
+                            </p>
+                        </div>
+                        <div class="bg-sky-50 rounded-xl p-3 border border-sky-100 text-xs text-sky-900">
+                            <span class="font-bold block mb-1"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> Rumus Utama:</span>
+                            Skala = Jarak Peta (JP) ÷ Jarak Sebenarnya (JS)
+                        </div>
+                    </div>
+
+                    <!-- Case 2: Denah SMP PGRI 01 Batu -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                                <i class="fa-solid fa-school"></i>
+                            </div>
+                            <h3 class="font-heading font-bold text-lg text-slate-800 mb-2">2. Denah Sekolah Kita</h3>
+                            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                                Bu Windy ingin membuat denah Lapangan Basket SMP PGRI 01 BATU berukuran 20 meter × 10 meter pada kertas A4 dengan skala <strong>1 : 200</strong>.
+                            </p>
+                        </div>
+                        <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100 text-xs text-emerald-900">
+                            <span class="font-bold block mb-1"><i class="fa-solid fa-calculator mr-1"></i> Hitung Panjang di Gambar:</span>
+                            20 m = 2.000 cm → JP = 2.000 / 200 = <strong>10 cm</strong>.
+                        </div>
+                    </div>
+
+                    <!-- Case 3: Rasio Resep Sari Apel -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                                <i class="fa-solid fa-glass-water"></i>
+                            </div>
+                            <h3 class="font-heading font-bold text-lg text-slate-800 mb-2">3. Rasio Sari Apel Batu</h3>
+                            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                                Resep minuman Sari Apel Khas Batu memerlukan rasio Extrak Apel : Air senilai <strong>2 : 5</strong>. Jika kita punya 10 gelas Extrak Apel, berapa gelas airnya?
+                            </p>
+                        </div>
+                        <div class="bg-amber-50 rounded-xl p-3 border border-amber-100 text-xs text-amber-900">
+                            <span class="font-bold block mb-1"><i class="fa-solid fa-scale-balanced mr-1"></i> Perbandingan Senilai:</span>
+                            (10 / 2) × 5 = <strong>25 gelas Air</strong>.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MATERI TAMBAHAN DARI GURU -->
+                <div id="studentMaterialsSection" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hidden">
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h4 class="font-heading font-bold text-slate-800">Materi Tambahan dari Guru</h4>
+                            <p class="text-xs text-slate-500">Materi yang dibuat atau diperbarui guru akan tampil di sini.</p>
+                        </div>
+                        <span class="bg-sky-100 text-sky-700 text-[10px] font-bold px-2.5 py-1 rounded-full">DARI GURU</span>
+                    </div>
+                    <div id="studentMaterialsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 text-center">
+                    <h4 class="font-heading font-bold text-slate-800 mb-2">Siap Mencoba Simulasi Interaktif?</h4>
+                    <p class="text-xs text-slate-500 mb-4">Uji coba langsung dengan menggeser slider skala di laboratorium simulasi kami!</p>
+                    <button onclick="switchTab('simulasi')" class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs transition-all shadow-md">
+                        Buka Simulasi Skala <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: SIMULASI INTERAKTIF (JOYFUL & ACTIVE LEARNING) -->
+            <!-- =========================================================
+     TAB 2: EKSPLORASI GOOGLE MAPS KOTA BATU
+     ========================================================= -->
+
+<div id="tabSimulasi" class="tab-pane hidden space-y-6">
+
+    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+
+        <!-- HEADER -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+
+            <div>
+                <h2 class="font-heading text-xl font-bold text-slate-800">
+                    🗺️ Eksplorasi Google Maps Kota Batu
+                </h2>
+
+                <p class="text-xs text-slate-500 mt-1">
+                    Klik lokasi untuk membuka Google Maps dan mengamati
+                    jarak antar tempat dalam pembelajaran rasio dan skala.
+                </p>
+            </div>
+
+            <span class="bg-sky-100 text-sky-700 font-semibold text-xs px-3 py-1 rounded-full">
+                Rasio & Skala • Kelas VII
+            </span>
+
+        </div>
+
+
+        <!-- =====================================================
+             BANNER GOOGLE MAPS
+             ===================================================== -->
+
+        <div class="relative overflow-hidden rounded-2xl bg-slate-900 mb-6">
+
+            <div class="absolute inset-0 opacity-20
+                bg-[radial-gradient(#fff_1px,transparent_1px)]
+                [background-size:16px_16px]">
+            </div>
+
+            <div class="relative z-10 p-6 md:p-8">
+
+                <div class="flex flex-col md:flex-row
+                            items-center justify-between gap-6">
+
+                    <div class="text-white">
+
+                        <div class="flex items-center gap-3 mb-3">
+
+                            <div class="w-12 h-12 rounded-2xl
+                                        bg-white/10 flex items-center
+                                        justify-center text-2xl">
+
+                                🗺️
+
+                            </div>
+
+                            <div>
+
+                                <h3 class="font-bold text-lg">
+                                    Jelajahi Kota Wisata Batu
+                                </h3>
+
+                                <p class="text-xs text-slate-300">
+                                    Belajar matematika melalui lokasi nyata
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <p class="text-sm text-slate-300 max-w-xl">
+                            Pilih salah satu lokasi di bawah ini untuk
+                            membuka Google Maps. Amati jarak, posisi,
+                            dan rute perjalanan sebagai bahan belajar
+                            rasio dan skala.
+                        </p>
+
+                    </div>
+
+
+                    <!-- BUTTON GOOGLE MAPS UTAMA -->
+
+                    <a
+                        href="https://www.google.com/maps/search/?api=1&query=Kota+Batu+Jawa+Timur"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="shrink-0 inline-flex items-center gap-2
+                               bg-sky-500 hover:bg-sky-400
+                               text-white font-bold
+                               px-5 py-3 rounded-xl
+                               shadow-lg transition-all
+                               hover:scale-105">
+
+                        <i class="fa-solid fa-map-location-dot"></i>
+
+                        Buka Google Maps
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             PETUNJUK
+             ===================================================== -->
+
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
+
+            <div class="flex items-start gap-3">
+
+                <div class="text-2xl">
+                    💡
+                </div>
+
+                <div>
+
+                    <h3 class="font-bold text-sm text-amber-800">
+                        Cara Menggunakan
+                    </h3>
+
+                    <ol class="text-xs text-slate-600 mt-2 space-y-1 list-decimal list-inside">
+
+                        <li>
+                            Pilih salah satu lokasi Kota Batu.
+                        </li>
+
+                        <li>
+                            Google Maps akan terbuka pada tab baru.
+                        </li>
+
+                        <li>
+                            Amati jarak dan rute perjalanan.
+                        </li>
+
+                        <li>
+                            Gunakan informasi tersebut untuk menyelesaikan
+                            masalah rasio dan skala.
+                        </li>
+
+                    </ol>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             DAFTAR LOKASI
+             ===================================================== -->
+
+        <div class="mb-4">
+
+            <h3 class="font-bold text-slate-800 text-base">
+                📍 Pilih Lokasi Eksplorasi
+            </h3>
+
+            <p class="text-xs text-slate-500 mt-1">
+                Klik kartu lokasi untuk langsung membuka Google Maps.
+            </p>
+
+        </div>
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+
+            <!-- ALUN-ALUN -->
+
+            <a
+                href="https://www.google.com/maps/search/?api=1&query=Alun-Alun+Kota+Batu+Jawa+Timur"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group bg-gradient-to-br from-rose-50 to-white
+                       border border-rose-200 rounded-2xl p-5
+                       hover:shadow-lg hover:-translate-y-1
+                       transition-all">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-12 h-12 rounded-xl
+                                bg-rose-500 text-white
+                                flex items-center justify-center
+                                text-xl shadow-md">
+
+                        🏛️
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <h4 class="font-bold text-sm text-slate-800">
+                            Alun-Alun Kota Batu
+                        </h4>
+
+                        <p class="text-[11px] text-slate-500 mt-1">
+                            Pusat Kota Batu
+                        </p>
+
+                    </div>
+
+                    <i class="fa-solid fa-arrow-up-right-from-square
+                              text-rose-400
+                              group-hover:text-rose-600">
+                    </i>
+
+                </div>
+
+            </a>
+
+
+            <!-- JATIM PARK 1 -->
+
+            <a
+                href="https://www.google.com/maps/search/?api=1&query=Jatim+Park+1+Kota+Batu+Jawa+Timur"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group bg-gradient-to-br from-sky-50 to-white
+                       border border-sky-200 rounded-2xl p-5
+                       hover:shadow-lg hover:-translate-y-1
+                       transition-all">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-12 h-12 rounded-xl
+                                bg-sky-500 text-white
+                                flex items-center justify-center
+                                text-xl shadow-md">
+
+                        🎢
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <h4 class="font-bold text-sm text-slate-800">
+                            Jatim Park 1
+                        </h4>
+
+                        <p class="text-[11px] text-slate-500 mt-1">
+                            Wisata Edukasi
+                        </p>
+
+                    </div>
+
+                    <i class="fa-solid fa-arrow-up-right-from-square
+                              text-sky-400
+                              group-hover:text-sky-600">
+                    </i>
+
+                </div>
+
+            </a>
+
+
+            <!-- JATIM PARK 2 -->
+
+            <a
+                href="https://www.google.com/maps/search/?api=1&query=Jatim+Park+2+Kota+Batu+Jawa+Timur"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group bg-gradient-to-br from-emerald-50 to-white
+                       border border-emerald-200 rounded-2xl p-5
+                       hover:shadow-lg hover:-translate-y-1
+                       transition-all">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-12 h-12 rounded-xl
+                                bg-emerald-500 text-white
+                                flex items-center justify-center
+                                text-xl shadow-md">
+
+                        🦖
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <h4 class="font-bold text-sm text-slate-800">
+                            Jatim Park 2
+                        </h4>
+
+                        <p class="text-[11px] text-slate-500 mt-1">
+                            Museum & Satwa
+                        </p>
+
+                    </div>
+
+                    <i class="fa-solid fa-arrow-up-right-from-square
+                              text-emerald-400
+                              group-hover:text-emerald-600">
+                    </i>
+
+                </div>
+
+            </a>
+
+
+            <!-- JATIM PARK 3 -->
+
+            <a
+                href="https://www.google.com/maps/search/?api=1&query=Jatim+Park+3+Kota+Batu+Jawa+Timur"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group bg-gradient-to-br from-violet-50 to-white
+                       border border-violet-200 rounded-2xl p-5
+                       hover:shadow-lg hover:-translate-y-1
+                       transition-all">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-12 h-12 rounded-xl
+                                bg-violet-500 text-white
+                                flex items-center justify-center
+                                text-xl shadow-md">
+
+                        🎡
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <h4 class="font-bold text-sm text-slate-800">
+                            Jatim Park 3
+                        </h4>
+
+                        <p class="text-[11px] text-slate-500 mt-1">
+                            Dino Park & Wisata
+                        </p>
+
+                    </div>
+
+                    <i class="fa-solid fa-arrow-up-right-from-square
+                              text-violet-400
+                              group-hover:text-violet-600">
+                    </i>
+
+                </div>
+
+            </a>
+
+
+            <!-- SELECTA -->
+
+            <a
+                href="https://www.google.com/maps/search/?api=1&query=Selecta+Kota+Batu+Jawa+Timur"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group bg-gradient-to-br from-teal-50 to-white
+                       border border-teal-200 rounded-2xl p-5
+                       hover:shadow-lg hover:-translate-y-1
+                       transition-all">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-12 h-12 rounded-xl
+                                bg-teal-500 text-white
+                                flex items-center justify-center
+                                text-xl shadow-md">
+
+                        🌲
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <h4 class="font-bold text-sm text-slate-800">
+                            Selecta
+                        </h4>
+
+                        <p class="text-[11px] text-slate-500 mt-1">
+                            Taman Wisata
+                        </p>
+
+                    </div>
+
+                    <i class="fa-solid fa-arrow-up-right-from-square
+                              text-teal-400
+                              group-hover:text-teal-600">
+                    </i>
+
+                </div>
+
+            </a>
+
+
+            <!-- KEBUN APEL -->
+
+            <a
+                href="https://www.google.com/maps/search/?api=1&query=Kebun+Apel+Kota+Batu+Jawa+Timur"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group bg-gradient-to-br from-amber-50 to-white
+                       border border-amber-200 rounded-2xl p-5
+                       hover:shadow-lg hover:-translate-y-1
+                       transition-all">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-12 h-12 rounded-xl
+                                bg-amber-500 text-white
+                                flex items-center justify-center
+                                text-xl shadow-md">
+
+                        🍎
+
+                    </div>
+
+                    <div class="flex-1">
+
+                        <h4 class="font-bold text-sm text-slate-800">
+                            Kebun Apel
+                        </h4>
+
+                        <p class="text-[11px] text-slate-500 mt-1">
+                            Agrowisata Kota Batu
+                        </p>
+
+                    </div>
+
+                    <i class="fa-solid fa-arrow-up-right-from-square
+                              text-amber-400
+                              group-hover:text-amber-600">
+                    </i>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <!-- =====================================================
+             AKTIVITAS PEMBELAJARAN
+             ===================================================== -->
+
+        <div class="mt-6 bg-slate-900 rounded-2xl p-5 text-white">
+
+            <div class="flex items-center gap-3 mb-4">
+
+                <div class="w-10 h-10 rounded-xl bg-sky-500
+                            flex items-center justify-center">
+
+                    🎯
+
+                </div>
+
+                <div>
+
+                    <h3 class="font-bold text-sm">
+                        Misi Jelajah Kota Batu
+                    </h3>
+
+                    <p class="text-[11px] text-slate-400">
+                        Gunakan Google Maps untuk menyelesaikan misi.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+
+                <!-- MISI 1 -->
+
+                <div class="bg-white/10 rounded-xl p-4">
+
+                    <div class="text-sky-300 font-bold text-xs mb-2">
+                        MISI 01
+                    </div>
+
+                    <p class="text-xs text-slate-300 leading-relaxed">
+
+                        Buka Google Maps dan cari jarak dari
+                        <b class="text-white">
+                            Alun-Alun Kota Batu
+                        </b>
+                        menuju
+                        <b class="text-white">
+                            Jatim Park 1
+                        </b>.
+
+                    </p>
+
+                </div>
+
+
+                <!-- MISI 2 -->
+
+                <div class="bg-white/10 rounded-xl p-4">
+
+                    <div class="text-emerald-300 font-bold text-xs mb-2">
+                        MISI 02
+                    </div>
+
+                    <p class="text-xs text-slate-300 leading-relaxed">
+
+                        Jika jarak sebenarnya adalah
+                        <b class="text-white">
+                            4 km
+                        </b>
+                        dan skala peta
+                        <b class="text-white">
+                            1 : 100.000
+                        </b>,
+                        berapa jarak pada peta?
+
+                    </p>
+
+                </div>
+
+
+                <!-- MISI 3 -->
+
+                <div class="bg-white/10 rounded-xl p-4">
+
+                    <div class="text-amber-300 font-bold text-xs mb-2">
+                        MISI 03
+                    </div>
+
+                    <p class="text-xs text-slate-300 leading-relaxed">
+
+                        Bandingkan jarak dari Alun-Alun ke
+                        <b class="text-white">
+                            Jatim Park 1
+                        </b>
+                        dan
+                        <b class="text-white">
+                            Selecta
+                        </b>.
+                        Mana yang lebih dekat?
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+            <!-- TAB 3: LAB GEOGEBRA INTEGRASI -->
+            <div id="tabGeogebra" class="tab-pane hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="font-heading text-xl font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-cube text-purple-600"></i>
+                                <span>Laboratorium Interaktif GeoGebra</span>
+                            </h2>
+                            <p class="text-xs text-slate-500">GeoGebra tampil otomatis — siswa tidak perlu mengunggah file .ggb.</p>
+                        </div>
+                        <button onclick="reloadDefaultGeoGebra()" class="text-xs text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-2 rounded-lg font-bold transition-all">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> Muat Ulang
+                        </button>
+                    </div>
+
+                    <div class="w-full bg-slate-100 rounded-2xl p-2 border border-slate-300">
+                        <div id="ggb-element" class="w-full rounded-xl overflow-hidden bg-white" style="min-height:520px;">
+                            <div class="min-h-[520px] flex items-center justify-center text-center text-slate-500 p-8">
+                                <div>
+                                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-purple-600 mb-3"></i>
+                                    <p class="text-xs font-semibold">GeoGebra sedang disiapkan...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 bg-purple-50 border border-purple-200 rounded-xl p-4 text-xs text-purple-900 flex items-start space-x-3">
+                        <i class="fa-solid fa-wand-magic-sparkles text-purple-600 text-base mt-0.5"></i>
+                        <div>
+                            <strong class="font-bold block text-slate-800 mb-1">Lab siap digunakan</strong>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li>File <strong>Skala Geo.ggb</strong> sudah ditanam di dalam website.</li>
+                                <li>Saat siswa membuka tab <strong>Lab GeoGebra</strong>, applet otomatis dimuat.</li>
+                                <li>Siswa dapat menggeser slider, titik, dan menggunakan alat GeoGebra sesuai aktivitas.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: TANTANGAN & REFLEKSI (SOAL DARI CRUD GURU) -->
+            <!-- TAB 4: TANTANGAN & REFLEKSI (KUIS & REFLEKSI INTERAKTIF) -->
+<div id="tabTantangan" class="tab-pane hidden space-y-6">
+    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        
+        <!-- Header Tantangan -->
+        <div class="flex items-center justify-between mb-6 gap-3 border-b border-slate-100 pb-4">
+            <div>
+                <h2 class="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-brain text-amber-500"></i>
+                    <span>Tantangan Reflektif & Studi Kasus</span>
+                </h2>
+                <p class="text-xs text-slate-500 mt-1">Uji pemahamanmu mengenai rasio dan skala melalui kasus nyata di sekitar Kota Batu!</p>
+            </div>
+            <span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-200">
+                Kuis Interaktif
+            </span>
+        </div>
+
+        <!-- Form Kuis & Refleksi -->
+        <form id="quizForm" onsubmit="submitQuiz(event)" class="space-y-6">
+            
+            <!-- Daftar Soal -->
+            <div id="studentQuestionList" class="space-y-6">
+                <div class="space-y-6">
+                </div>
+                SOAL 1
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-sky-700 bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200">Soal 1 • Peta Wisata</span>
+                        <span class="text-[11px] font-semibold text-slate-400">Skala Peta</span>
+                    </div>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+                        Jarak sebenarnya antara Alun-Alun Kota Batu dan Taman Wisata Selecta adalah <span class="text-sky-600 font-bold">6 km</span>. Jika skala peta yang digunakan adalah <span class="text-sky-600 font-bold">1 : 50.000</span>, berapa jarak kedua tempat tersebut pada peta?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-sky-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q1" value="A" required class="w-4 h-4 text-sky-600 focus:ring-sky-500">
+                            <span>A. 8 cm</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-sky-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q1" value="B" required class="w-4 h-4 text-sky-600 focus:ring-sky-500">
+                            <span>B. 12 cm</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-sky-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q1" value="C" required class="w-4 h-4 text-sky-600 focus:ring-sky-500">
+                            <span>C. 15 cm</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-sky-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q1" value="D" required class="w-4 h-4 text-sky-600 focus:ring-sky-500">
+                            <span>D. 20 cm</span>
+                        </label>
+                    </div>
+                </div>
+
+                SOAL 2
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-200">Soal 2 • Denah Sekolah</span>
+                        <span class="text-[11px] font-semibold text-slate-400">Denah Lapangan</span>
+                    </div>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+                        Bu Windy meminta siswa menggambar denah Lapangan Basket SMP PGRI 01 BATU. Jika panjang lapangan pada denah adalah <span class="text-emerald-600 font-bold">10 cm</span> dan skala denah <span class="text-emerald-600 font-bold">1 : 200</span>, berapa panjang sebenarnya lapangan basket tersebut?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-emerald-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q2" value="A" required class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
+                            <span>A. 15 meter</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-emerald-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q2" value="B" required class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
+                            <span>B. 20 meter</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-emerald-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q2" value="C" required class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
+                            <span>C. 25 meter</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-emerald-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q2" value="D" required class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
+                            <span>D. 30 meter</span>
+                        </label>
+                    </div>
+                </div>
+
+                SOAL 3
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full border border-amber-200">Soal 3 • Kuliner Khas Batu</span>
+                        <span class="text-[11px] font-semibold text-slate-400">Rasio Resep</span>
+                    </div>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+                        Resep pembuatan minuman Sari Apel Khas Batu memerlukan perbandingan konsentrat apel dan air sebesar <span class="text-amber-600 font-bold">2 : 5</span>. Jika dibuat minuman dengan <span class="text-amber-600 font-bold">10 gelas</span> konsentrat apel, berapa gelas air yang dibutuhkan?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-amber-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q3" value="A" required class="w-4 h-4 text-amber-600 focus:ring-amber-500">
+                            <span>A. 20 gelas</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-amber-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q3" value="B" required class="w-4 h-4 text-amber-600 focus:ring-amber-500">
+                            <span>B. 25 gelas</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-amber-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q3" value="C" required class="w-4 h-4 text-amber-600 focus:ring-amber-500">
+                            <span>C. 30 gelas</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-amber-50 transition-all text-xs text-slate-700">
+                            <input type="radio" name="q3" value="D" required class="w-4 h-4 text-amber-600 focus:ring-amber-500">
+                            <span>D. 35 gelas</span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BAGIAN REFLEKSI BELAJAR -->
+            <div class="bg-purple-50 rounded-2xl p-5 border border-purple-200 space-y-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-purple-700 bg-purple-100 px-2.5 py-1 rounded-full border border-purple-200">
+                        Refleksi Belajar Siswa
+                    </span>
+                </div>
+                <label for="refleksiText" class="block text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+                    Tuliskan 1 hal baru paling menarik atau penerapan nyata dari Rasio & Skala yang kamu pelajari hari ini!
+                </label>
+                <textarea id="refleksiText" rows="3" required placeholder="Contoh: Saya baru tahu kalau skala peta 1:50.000 itu artinya 1 cm mewakili 500 meter di lapangan..." class="w-full p-3 bg-white border border-purple-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-purple-500 transition-all"></textarea>
+            </div>
+
+            <!-- Tombol Submit -->
+            <button id="submitQuizBtn" type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-all text-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Kirim Jawaban & Lihat Hasil Laporan Belajar</span>
+            </button>
+        </form>
+
+        <!-- SCORE & LAPORAN RESULT CONTAINER -->
+        <div id="quizResultBox" class="hidden mt-6 bg-slate-900 text-white rounded-2xl p-6 text-center space-y-4">
+            <div class="w-16 h-16 bg-emerald-500 text-white rounded-full mx-auto flex items-center justify-center text-2xl font-bold shadow-lg">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <h3 class="font-heading text-2xl font-bold">Laporan Hasil Belajar Siswa</h3>
+                <p class="text-xs text-slate-400 mt-1">SMP PGRI 01 BATU • Rasio & Skala</p>
+            </div>
+            
+            <div class="py-2">
+                <div class="text-4xl font-extrabold text-emerald-400" id="finalScoreText">Nilai: 0</div>
+                <p class="text-xs text-slate-300 max-w-md mx-auto mt-2 leading-relaxed" id="feedbackText">
+                    Hasil akan tampil setelah kamu mengirim jawaban.
+                </p>
+            </div>
+
+            <!-- Ringkasan Refleksi Tampil di Hasil -->
+            <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4 text-left text-xs text-slate-300">
+                <span class="font-bold text-emerald-400 block mb-1"><i class="fa-solid fa-quote-left mr-1"></i> Refleksi Kamu:</span>
+                <p id="displayUserReflection" class="italic text-slate-200"></p>
+            </div>
+
+            <div class="pt-2 flex justify-center space-x-3 no-print">
+                <button onclick="window.print()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-md">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Cetak Laporan Hasil Belajar</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+            <!-- TAB 5: DASHBOARD GURU (CRUD) -->
+            <div id="tabGuru" class="tab-pane hidden space-y-6">
+                <!-- Header -->
+                <div class="bg-slate-900 rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="bg-emerald-500 text-slate-950 font-bold text-[10px] px-2 py-0.5 rounded-full">GURU PENGAMPU</span>
+                            <span class="text-xs text-slate-400">SMP PGRI 01 BATU</span>
+                        </div>
+                        <h2 class="font-heading text-2xl font-bold">Ibu Windy Tunas Putri, S.Pd.</h2>
+                        <p class="text-xs text-slate-300">Dashboard Guru — Kelola materi, soal, dan catatan pembelajaran.</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Data Tersimpan</div>
+                        <div class="text-2xl font-extrabold text-emerald-400" id="teacherDataCount">0</div>
+                        <div class="text-[10px] text-slate-400">materi + soal</div>
+                    </div>
+                </div>
+
+                <!-- CRUD MATERI -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+                        <div>
+                            <h3 class="font-heading font-bold text-slate-800 text-lg"><i class="fa-solid fa-book-open text-sky-600 mr-2"></i>Kelola Materi</h3>
+                            <p class="text-xs text-slate-500">Create, Read, Update, Delete materi tambahan untuk siswa.</p>
+                        </div>
+                        <button onclick="resetMaterialForm()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl"><i class="fa-solid fa-plus mr-1"></i>Materi Baru</button>
+                    </div>
+                    <form id="materialCrudForm" onsubmit="saveMaterial(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-sky-50 p-4 rounded-2xl border border-sky-100">
+                        <input type="hidden" id="materialEditId">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Judul Materi</label>
+                            <input id="materialTitle" required placeholder="Contoh: Skala pada Denah Sekolah" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-sky-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Konteks</label>
+                            <input id="materialContext" placeholder="Kota Batu / Sekolah / Kehidupan sehari-hari" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-sky-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Rumus / Kata Kunci</label>
+                            <input id="materialFormula" placeholder="Skala = JP ÷ JS" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-sky-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Isi Materi</label>
+                            <textarea id="materialContent" required rows="4" placeholder="Tuliskan penjelasan materi yang mudah dipahami siswa..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+                        </div>
+                        <div class="md:col-span-2 flex flex-wrap gap-2">
+                            <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl"><i class="fa-solid fa-floppy-disk mr-1"></i><span id="materialSubmitText">Simpan Materi</span></button>
+                            <button type="button" onclick="resetMaterialForm()" class="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl">Batal</button>
+                        </div>
+                    </form>
+                    <div id="teacherMaterialsList" class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+
+                <!-- CRUD SOAL -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+                        <div>
+                            <h3 class="font-heading font-bold text-slate-800 text-lg"><i class="fa-solid fa-circle-question text-amber-500 mr-2"></i>Kelola Soal Latihan</h3>
+                            <p class="text-xs text-slate-500">Buat, lihat, edit, atau hapus soal latihan untuk siswa.</p>
+                        </div>
+                        <button onclick="resetQuestionForm()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl"><i class="fa-solid fa-plus mr-1"></i>Soal Baru</button>
+                    </div>
+                    <form id="questionCrudForm" onsubmit="saveQuestion(event)" class="space-y-3 bg-amber-50 p-4 rounded-2xl border border-amber-100">
+                        <input type="hidden" id="questionEditId">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Pertanyaan</label>
+                            <textarea id="questionText" required rows="3" placeholder="Tuliskan soal kontekstual rasio atau skala..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input id="optionA" required placeholder="A. Pilihan jawaban" class="px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none">
+                            <input id="optionB" required placeholder="B. Pilihan jawaban" class="px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none">
+                            <input id="optionC" required placeholder="C. Pilihan jawaban" class="px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none">
+                            <input id="optionD" required placeholder="D. Pilihan jawaban" class="px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Jawaban Benar</label>
+                                <select id="questionAnswer" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white outline-none">
+                                    <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Pembahasan</label>
+                                <input id="questionExplanation" placeholder="Penjelasan singkat jawaban" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm outline-none">
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl"><i class="fa-solid fa-floppy-disk mr-1"></i><span id="questionSubmitText">Simpan Soal</span></button>
+                            <button type="button" onclick="resetQuestionForm()" class="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl">Batal</button>
+                        </div>
+                    </form>
+                    <div id="teacherQuestionsList" class="mt-5 space-y-3"></div>
+                </div>
+
+                <!-- CATATAN GURU -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                    <h3 class="font-heading font-bold text-slate-800 text-lg mb-1"><i class="fa-solid fa-note-sticky text-purple-600 mr-2"></i>Kelola Catatan / Instruksi</h3>
+                    <p class="text-xs text-slate-500 mb-4">Catatan dapat dibuat, diperbarui, dan dihapus.</p>
+                    <div class="space-y-3">
+                        <textarea id="teacherNoteInput" rows="3" placeholder="Tuliskan petunjuk tugas tambahan untuk kelas..." class="w-full p-3 border border-slate-300 rounded-xl text-xs outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="saveTeacherNote()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl"><i class="fa-solid fa-save mr-1"></i>Simpan / Perbarui</button>
+                            <button onclick="deleteTeacherNote()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-xs rounded-xl"><i class="fa-solid fa-trash mr-1"></i>Hapus</button>
+                        </div>
+                    </div>
+                    <div id="teacherNoteDisplay" class="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-700 hidden">
+                        <div class="font-bold text-slate-800 mb-1"><i class="fa-solid fa-note-sticky text-amber-500 mr-1"></i> Instruksi Terbaru:</div>
+                        <p id="teacherNoteContent"></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- PRINT ONLY REPORT SUMMARY -->
+    <div id="printReport" class="hidden print-only p-8 text-slate-900">
+        <div class="text-center border-b pb-4 mb-4">
+            <h1 class="text-2xl font-bold">SMP PGRI 01 BATU</h1>
+            <p class="text-sm">Laporan Hasil Belajar Matematika - Rasio & Skala</p>
+            <p class="text-xs text-slate-500">Guru Pengampu: Windy Tunas Putri, M.Pd.</p>
+        </div>
+        <div class="space-y-2 text-sm mb-6">
+            <div><strong>Nama Siswa:</strong> <span id="printStudentName">-</span></div>
+            <div><strong>Kelas:</strong> <span id="printStudentClass">-</span></div>
+            <div><strong>Nilai Evaluasi:</strong> <span id="printStudentScore">-</span></div>
+        </div>
+        <div class="border p-4 rounded-lg bg-slate-50">
+            <h3 class="font-bold text-xs mb-1">Refleksi Belajar Siswa:</h3>
+            <p id="printStudentReflection" class="text-xs italic text-slate-700">-</p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8 no-print">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            &copy; 2026 Inovasi Pembelajaran Matematika - Windy Tunas Putri (SMP PGRI 01 BATU)
+        </div>
+    </footer>
+
+    <script>
+        // State Application Variables
+        let currentUser = null; // { role: 'siswa' | 'guru', name: '', classInfo: '' }
+        let ggbApp = null;
+
+        // Login Role Selector Toggle
+        function toggleLoginRole(role) {
+            const btnSiswa = document.getElementById('tabBtnSiswa');
+            const btnGuru = document.getElementById('tabBtnGuru');
+            const formSiswa = document.getElementById('formSiswa');
+            const formGuru = document.getElementById('formGuru');
+
+            if (role === 'siswa') {
+                btnSiswa.className = "py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all bg-white text-slate-800 shadow-sm";
+                btnGuru.className = "py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-500 transition-all hover:text-slate-800";
+                formSiswa.classList.remove('hidden');
+                formGuru.classList.add('hidden');
+            } else {
+                btnGuru.className = "py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all bg-white text-slate-800 shadow-sm";
+                btnSiswa.className = "py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-500 transition-all hover:text-slate-800";
+                formGuru.classList.remove('hidden');
+                formSiswa.classList.add('hidden');
+            }
+        }
+
+        // Login Handler Siswa
+        function handleLoginSiswa(e) {
+            e.preventDefault();
+            const nama = document.getElementById('inputNamaSiswa').value.trim();
+            const kelas = document.getElementById('inputKelasSiswa').value.trim();
+
+            if (!nama || !kelas) return;
+
+            currentUser = {
+                role: 'siswa',
+                name: nama,
+                classInfo: kelas
+            };
+
+            initSession();
+        }
+
+        // Login Handler Guru
+        function handleLoginGuru(e) {
+            e.preventDefault();
+            const pass = document.getElementById('inputPassGuru').value;
+
+            if (pass !== 'batu2026') {
+                alert('Kata sandi guru salah. Gunakan: batu2026');
+                return;
+            }
+
+            currentUser = {
+                role: 'guru',
+                name: 'Windy Tunas Putri, M.Pd.',
+                classInfo: 'SMP PGRI 01 BATU'
+            };
+
+            initSession();
+        }
+
+        // Initialize Session Dashboard
+        function initSession() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appContent').classList.remove('hidden');
+
+            // Header Display Updates
+            document.getElementById('userBadge').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('userNameDisplay').innerText = currentUser.name;
+            document.getElementById('userAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
+
+            const roleBadge = document.getElementById('userRoleBadge');
+
+            if (currentUser.role === 'guru') {
+                roleBadge.innerText = 'Guru';
+                roleBadge.className = 'text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold';
+                switchTab('guru');
+                renderTeacherDashboard();
+            } else {
+                roleBadge.innerText = 'Siswa (' + currentUser.classInfo + ')';
+                roleBadge.className = 'text-[10px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full font-semibold';
+                switchTab('konsep');
+                renderStudentContent();
+            }
+
+            // GeoGebra dimuat otomatis saat menu Lab GeoGebra dibuka.
+            // Init Simulator
+            updateSimulasi();
+        }
+
+        // Logout System
+        function logout() {
+            currentUser = null;
+            document.getElementById('appContent').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('userBadge').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            switchTab('konsep');
+        }
+
+        // Tab Switching Engine
+        function switchTab(tabId) {
+            const tabs = ['konsep', 'simulasi', 'geogebra', 'tantangan', 'guru'];
+            tabs.forEach(t => {
+                const pane = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+                const navBtn = document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1));
+                if (pane) pane.classList.add('hidden');
+                if (navBtn) {
+                    navBtn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 flex items-center space-x-2";
+                }
+            });
+
+            const activePane = document.getElementById('tab' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+            const activeNav = document.getElementById('nav' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+            if (activePane) activePane.classList.remove('hidden');
+
+            if (activeNav) {
+                activeNav.className = tabId === 'guru'
+                    ? "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-emerald-600 text-white shadow-sm flex items-center space-x-2"
+                    : "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-sky-600 text-white shadow-sm flex items-center space-x-2";
+            }
+
+            // PENTING: GeoGebra baru di-inject setelah tab terlihat.
+            // Ini mencegah applet gagal menghitung ukuran ketika parent masih display:none.
+            if (tabId === 'geogebra') {
+                setTimeout(() => initGeoGebra(false), 100);
+            }
+        }
+
+        // TAB 2 SIMULATOR CALCULATION
+        function updateSimulasi() {
+            const scaleN = parseInt(document.getElementById('simScaleSlider').value);
+            const jp = parseFloat(document.getElementById('simJPInput').value) || 1;
+            const objType = document.getElementById('simObjectType').value;
+
+            // Update scale text
+            document.getElementById('scaleValDisplay').innerText = `1 : ${scaleN.toLocaleString('id-ID')}`;
+            document.getElementById('visualScaleBadge').innerText = `Skala 1:${scaleN}`;
+
+            // Calculation
+            const jsCm = jp * scaleN;
+            const jsMeters = jsCm / 100;
+            const jsKm = jsMeters / 1000;
+
+            document.getElementById('simResultMeters').innerText = `${jsMeters.toLocaleString('id-ID')} m`;
+            document.getElementById('simResultKm').innerText = `${jsKm.toLocaleString('id-ID', {maximumFractionDigits: 2})} km`;
+            document.getElementById('lineJPText').innerText = `${jp} cm`;
+            document.getElementById('explainScaleMeters').innerText = `${(scaleN/100).toLocaleString('id-ID')} meter`;
+
+            // Dynamic Point Labels
+            const pointA = document.getElementById('simPointALabel');
+            const pointB = document.getElementById('simPointBLabel');
+
+            if (objType === 'batu-alun') {
+                pointA.innerText = 'Alun-Alun Batu';
+                pointB.innerText = 'SMP PGRI 01 BATU';
+            } else if (objType === 'selecta') {
+                pointA.innerText = 'SMP PGRI 01 BATU';
+                pointB.innerText = 'Taman Selecta';
+            } else {
+                pointA.innerText = 'Ujung Barat Lapangan';
+                pointB.innerText = 'Ujung Timur Lapangan';
+            }
+        }
+
+        // TAB 3 GEOGEBRA INTEGRATION
+        // File .ggb sudah ditanam sebagai Base64 sehingga siswa tidak perlu upload.
+        const EMBEDDED_GGB_BASE64 = "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";
+        ggbApp = null;
+        let ggbInitialized = false;
+        let ggbLoading = false;
+
+        function showGeoGebraMessage(icon, title, text, color='purple') {
+            const container = document.getElementById('ggb-element');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="min-h-[520px] flex items-center justify-center text-center p-8">
+                    <div>
+                        <i class="fa-solid ${icon} text-3xl text-${color}-600 mb-3"></i>
+                        <p class="text-sm font-bold text-slate-700">${title}</p>
+                        <p class="text-xs text-slate-500 mt-1">${text}</p>
+                    </div>
+                </div>`;
+        }
+
+        function initGeoGebra(forceReload=false) {
+            const container = document.getElementById('ggb-element');
+            if (!container) return;
+
+            // Jangan inject berulang kali jika applet sudah tampil.
+            if (ggbInitialized && !forceReload) return;
+            if (ggbLoading && !forceReload) return;
+
+            if (!window.GGBApplet) {
+                showGeoGebraMessage('fa-triangle-exclamation', 'GeoGebra belum siap', 'Tunggu beberapa detik atau periksa koneksi internet.', 'rose');
+                // Coba lagi setelah API selesai dimuat.
+                setTimeout(() => {
+                    if (document.getElementById('tabGeogebra') && !document.getElementById('tabGeogebra').classList.contains('hidden')) {
+                        initGeoGebra(forceReload);
+                    }
+                }, 1000);
+                return;
+            }
+
+            ggbLoading = true;
+            if (forceReload) {
+                ggbApp = null;
+                ggbInitialized = false;
+            }
+
+            container.innerHTML = '<div class="min-h-[520px] flex items-center justify-center"><div class="text-center"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-purple-600 mb-3"></i><p class="text-xs font-semibold text-slate-500">Memuat GeoGebra...</p></div></div>';
+
+            // Parent sudah terlihat karena fungsi ini dipanggil setelah tab dibuka.
+            const width = Math.max(640, Math.min(container.clientWidth || 900, 1200));
+            const height = Math.max(500, Math.min(Math.round(width * 0.62), 700));
+
+            const params = {
+                appName: 'classic',
+                width: width,
+                height: height,
+                showToolBar: true,
+                showAlgebraInput: false,
+                showMenuBar: false,
+                showResetIcon: true,
+                showZoomButtons: true,
+                enableLabelDrags: true,
+                enableShiftDragZoom: true,
+                enableRightClick: false,
+                playButton: false,
+                allowStyleBar: true,
+                ggbBase64: EMBEDDED_GGB_BASE64,
+                appletOnLoad: function(api) {
+                    ggbApp = api;
+                    ggbInitialized = true;
+                    ggbLoading = false;
+                    try { api.setPerspective && api.setPerspective('G'); } catch(e) {}
+                }
+            };
+
+            try {
+                const applet = new GGBApplet(params, true);
+                applet.inject('ggb-element');
+            } catch (err) {
+                ggbLoading = false;
+                showGeoGebraMessage('fa-triangle-exclamation', 'GeoGebra gagal dimuat', 'Klik Muat Ulang untuk mencoba lagi.', 'rose');
+                console.error('GeoGebra:', err);
+            }
+        }
+
+        function reloadDefaultGeoGebra() {
+            ggbApp = null;
+            ggbInitialized = false;
+            ggbLoading = false;
+            setTimeout(() => initGeoGebra(true), 50);
+        }
+
+        window.addEventListener('resize', () => {
+            if (!ggbApp || !ggbInitialized) return;
+            const container = document.getElementById('ggb-element');
+            if (!container) return;
+            const width = Math.max(640, Math.min(container.clientWidth || 900, 1200));
+            const height = Math.max(500, Math.min(Math.round(width * 0.62), 700));
+            try { if (typeof ggbApp.setSize === 'function') ggbApp.setSize(width, height); } catch(e) {}
+        });
+
+        // TAB 4 QUIZ & REFLECTION SUBMISSION
+        function submitQuiz(e) {
+            e.preventDefault();
+            if (!currentUser || currentUser.role !== 'siswa') return;
+
+            const questions = getQuestions();
+            const refleksi = document.getElementById('refleksiText').value.trim();
+            let correct = 0;
+
+            questions.forEach(q => {
+                const selected = document.querySelector(`input[name="teacherQ_${q.id}"]:checked`);
+                if (selected && selected.value === q.answer) correct++;
+            });
+
+            const total = questions.length;
+            const score = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+            const resultBox = document.getElementById('quizResultBox');
+            const scoreText = document.getElementById('finalScoreText');
+            const feedbackText = document.getElementById('feedbackText');
+
+            resultBox.classList.remove('hidden');
+            scoreText.innerText = total > 0 ? `Nilai: ${score}` : 'Nilai: -';
+
+            if (total === 0) {
+                feedbackText.innerText = 'Belum ada soal dari guru. Refleksi kamu sudah diterima.';
+            } else if (score === 100) {
+                feedbackText.innerText = `Luar biasa, ${currentUser.name}! Semua jawaban kamu benar.`;
+            } else if (score >= 75) {
+                feedbackText.innerText = `Bagus sekali, ${currentUser.name}! Pemahamanmu sudah sangat baik. Periksa kembali soal yang masih keliru.`;
+            } else if (score >= 50) {
+                feedbackText.innerText = `Bagus, ${currentUser.name}! Kamu sudah memahami sebagian konsep. Pelajari kembali materi dan pembahasan soal.`;
+            } else {
+                feedbackText.innerText = `Tetap semangat, ${currentUser.name}! Pelajari kembali materi Rasio & Skala dan coba lagi.`;
+            }
+
+            // Populate Print Report Data
+            document.getElementById('printStudentName').innerText = currentUser.name;
+            document.getElementById('printStudentClass').innerText = currentUser.classInfo;
+            document.getElementById('printStudentScore').innerText = total > 0 ? `${score} / 100 (${correct}/${total} benar)` : '-';
+            document.getElementById('printStudentReflection').innerText = refleksi || '-';
+        }
+
+        // ================= CRUD GURU =================
+        const MATERIAL_KEY = 'METRIKS G-MAPS_teacher_materials_v1';
+        const QUESTION_KEY = 'METRIKS G-MAPS_teacher_questions_v1';
+        const NOTE_KEY = 'METRIKS G-MAPS_teacher_note_v1';
+
+        function getMaterials() {
+            try { return JSON.parse(localStorage.getItem(MATERIAL_KEY) || '[]'); } catch (e) { return []; }
+        }
+        function setMaterials(items) { localStorage.setItem(MATERIAL_KEY, JSON.stringify(items)); }
+        function getQuestions() {
+            try { return JSON.parse(localStorage.getItem(QUESTION_KEY) || '[]'); } catch (e) { return []; }
+        }
+        function setQuestions(items) { localStorage.setItem(QUESTION_KEY, JSON.stringify(items)); }
+
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+        }
+
+        function resetMaterialForm() {
+            document.getElementById('materialCrudForm').reset();
+            document.getElementById('materialEditId').value = '';
+            document.getElementById('materialSubmitText').innerText = 'Simpan Materi';
+        }
+
+        function saveMaterial(e) {
+            e.preventDefault();
+            if (currentUser?.role !== 'guru') return alert('Hanya guru yang dapat mengelola materi.');
+            const id = document.getElementById('materialEditId').value;
+            const item = {
+                id: id || ('m' + Date.now()),
+                title: document.getElementById('materialTitle').value.trim(),
+                context: document.getElementById('materialContext').value.trim(),
+                formula: document.getElementById('materialFormula').value.trim(),
+                content: document.getElementById('materialContent').value.trim(),
+                updatedAt: new Date().toLocaleString('id-ID')
+            };
+            const items = getMaterials();
+            const idx = items.findIndex(x => x.id === item.id);
+            if (idx >= 0) items[idx] = item; else items.unshift(item);
+            setMaterials(items);
+            resetMaterialForm();
+            renderTeacherDashboard();
+            alert(idx >= 0 ? 'Materi berhasil diperbarui.' : 'Materi berhasil ditambahkan.');
+        }
+
+        function editMaterial(id) {
+            const item = getMaterials().find(x => x.id === id);
+            if (!item) return;
+            document.getElementById('materialEditId').value = item.id;
+            document.getElementById('materialTitle').value = item.title;
+            document.getElementById('materialContext').value = item.context;
+            document.getElementById('materialFormula').value = item.formula;
+            document.getElementById('materialContent').value = item.content;
+            document.getElementById('materialSubmitText').innerText = 'Perbarui Materi';
+            document.getElementById('materialCrudForm').scrollIntoView({behavior:'smooth', block:'center'});
+        }
+
+        function deleteMaterial(id) {
+            if (!confirm('Hapus materi ini? Data yang dihapus tidak dapat dikembalikan.')) return;
+            setMaterials(getMaterials().filter(x => x.id !== id));
+            renderTeacherDashboard();
+        }
+
+        function resetQuestionForm() {
+            document.getElementById('questionCrudForm').reset();
+            document.getElementById('questionEditId').value = '';
+            document.getElementById('questionSubmitText').innerText = 'Simpan Soal';
+        }
+
+        function saveQuestion(e) {
+            e.preventDefault();
+            if (currentUser?.role !== 'guru') return alert('Hanya guru yang dapat mengelola soal.');
+            const id = document.getElementById('questionEditId').value;
+            const item = {
+                id: id || ('q' + Date.now()),
+                text: document.getElementById('questionText').value.trim(),
+                A: document.getElementById('optionA').value.trim(),
+                B: document.getElementById('optionB').value.trim(),
+                C: document.getElementById('optionC').value.trim(),
+                D: document.getElementById('optionD').value.trim(),
+                answer: document.getElementById('questionAnswer').value,
+                explanation: document.getElementById('questionExplanation').value.trim(),
+                updatedAt: new Date().toLocaleString('id-ID')
+            };
+            const items = getQuestions();
+            const idx = items.findIndex(x => x.id === item.id);
+            if (idx >= 0) items[idx] = item; else items.unshift(item);
+            setQuestions(items);
+            resetQuestionForm();
+            renderTeacherDashboard();
+            alert(idx >= 0 ? 'Soal berhasil diperbarui.' : 'Soal berhasil ditambahkan.');
+        }
+
+        function editQuestion(id) {
+            const item = getQuestions().find(x => x.id === id);
+            if (!item) return;
+            document.getElementById('questionEditId').value = item.id;
+            document.getElementById('questionText').value = item.text;
+            document.getElementById('optionA').value = item.A;
+            document.getElementById('optionB').value = item.B;
+            document.getElementById('optionC').value = item.C;
+            document.getElementById('optionD').value = item.D;
+            document.getElementById('questionAnswer').value = item.answer;
+            document.getElementById('questionExplanation').value = item.explanation || '';
+            document.getElementById('questionSubmitText').innerText = 'Perbarui Soal';
+            document.getElementById('questionCrudForm').scrollIntoView({behavior:'smooth', block:'center'});
+        }
+
+        function deleteQuestion(id) {
+            if (!confirm('Hapus soal ini? Data yang dihapus tidak dapat dikembalikan.')) return;
+            setQuestions(getQuestions().filter(x => x.id !== id));
+            renderTeacherDashboard();
+        }
+
+        function saveTeacherNote() {
+            if (currentUser?.role !== 'guru') return;
+            const note = document.getElementById('teacherNoteInput').value.trim();
+            if (!note) return alert('Catatan masih kosong.');
+            localStorage.setItem(NOTE_KEY, note);
+            renderTeacherDashboard();
+            alert('Catatan berhasil disimpan/diperbarui.');
+        }
+
+        function deleteTeacherNote() {
+            if (!confirm('Hapus catatan/instruksi guru?')) return;
+            localStorage.removeItem(NOTE_KEY);
+            document.getElementById('teacherNoteInput').value = '';
+            renderTeacherDashboard();
+        }
+
+        function renderTeacherDashboard() {
+            const materials = getMaterials();
+            const questions = getQuestions();
+            const count = document.getElementById('teacherDataCount');
+            if (count) count.innerText = materials.length + questions.length;
+
+            const materialList = document.getElementById('teacherMaterialsList');
+            if (materialList) {
+                materialList.innerHTML = materials.length ? materials.map(m => `
+                    <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm">
+                        <div class="flex justify-between gap-2 items-start">
+                            <div><h4 class="font-bold text-slate-800 text-sm">${escapeHTML(m.title)}</h4><p class="text-[10px] text-slate-400 mt-1">${escapeHTML(m.updatedAt || '')}</p></div>
+                            <span class="text-[10px] bg-sky-100 text-sky-700 px-2 py-1 rounded-full">Materi</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-3">${escapeHTML(m.content)}</p>
+                        ${m.context ? `<p class="text-[11px] text-sky-700 mt-2"><b>Konteks:</b> ${escapeHTML(m.context)}</p>` : ''}
+                        ${m.formula ? `<p class="text-[11px] text-emerald-700 mt-1"><b>Kata kunci:</b> ${escapeHTML(m.formula)}</p>` : ''}
+                        <div class="flex gap-2 mt-4">
+                            <button onclick="editMaterial('${m.id}')" class="px-3 py-1.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg text-[11px] font-bold"><i class="fa-solid fa-pen mr-1"></i>Edit</button>
+                            <button onclick="deleteMaterial('${m.id}')" class="px-3 py-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-[11px] font-bold"><i class="fa-solid fa-trash mr-1"></i>Hapus</button>
+                        </div>
+                    </div>`).join('') : '<div class="md:col-span-2 text-center text-xs text-slate-400 py-8 border border-dashed border-slate-300 rounded-xl">Belum ada materi tambahan. Klik “Materi Baru” untuk membuat.</div>';
+            }
+
+            const questionList = document.getElementById('teacherQuestionsList');
+            if (questionList) {
+                questionList.innerHTML = questions.length ? questions.map((q, i) => `
+                    <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm">
+                        <div class="flex justify-between gap-3 items-start">
+                            <p class="text-sm font-bold text-slate-800"><span class="text-amber-600">${i+1}.</span> ${escapeHTML(q.text)}</p>
+                            <span class="shrink-0 text-[10px] bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">Kunci: ${escapeHTML(q.answer)}</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-xs text-slate-600">
+                            <div>A. ${escapeHTML(q.A)}</div><div>B. ${escapeHTML(q.B)}</div><div>C. ${escapeHTML(q.C)}</div><div>D. ${escapeHTML(q.D)}</div>
+                        </div>
+                        ${q.explanation ? `<div class="mt-3 bg-slate-50 rounded-lg p-2 text-[11px] text-slate-600"><b>Pembahasan:</b> ${escapeHTML(q.explanation)}</div>` : ''}
+                        <div class="flex gap-2 mt-4">
+                            <button onclick="editQuestion('${q.id}')" class="px-3 py-1.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg text-[11px] font-bold"><i class="fa-solid fa-pen mr-1"></i>Edit</button>
+                            <button onclick="deleteQuestion('${q.id}')" class="px-3 py-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-[11px] font-bold"><i class="fa-solid fa-trash mr-1"></i>Hapus</button>
+                        </div>
+                    </div>`).join('') : '<div class="text-center text-xs text-slate-400 py-8 border border-dashed border-slate-300 rounded-xl">Belum ada soal tambahan. Klik “Soal Baru” untuk membuat.</div>';
+            }
+
+            const savedNote = localStorage.getItem(NOTE_KEY) || '';
+            const noteInput = document.getElementById('teacherNoteInput');
+            const noteDisplay = document.getElementById('teacherNoteDisplay');
+            const noteContent = document.getElementById('teacherNoteContent');
+            if (noteInput && document.activeElement !== noteInput) noteInput.value = savedNote;
+            if (noteDisplay && noteContent) {
+                noteContent.innerText = savedNote;
+                noteDisplay.classList.toggle('hidden', !savedNote);
+            }
+        }
+
+        function renderStudentContent() {
+            const materials = getMaterials();
+            const questions = getQuestions();
+            const ms = document.getElementById('studentMaterialsSection');
+            const ml = document.getElementById('studentMaterialsList');
+            if (ms && ml) {
+                ms.classList.toggle('hidden', materials.length === 0);
+                ml.innerHTML = materials.map(m => `
+                    <article class="rounded-2xl border border-sky-100 bg-sky-50 p-4">
+                        <h4 class="font-bold text-slate-800 text-sm">${escapeHTML(m.title)}</h4>
+                        ${m.context ? `<div class="text-[10px] text-sky-700 font-semibold mt-1">${escapeHTML(m.context)}</div>` : ''}
+                        <p class="text-xs text-slate-600 leading-relaxed mt-2 whitespace-pre-line">${escapeHTML(m.content)}</p>
+                        ${m.formula ? `<div class="mt-3 bg-white rounded-xl p-2 text-[11px] text-emerald-700"><b>Rumus/Kata Kunci:</b> ${escapeHTML(m.formula)}</div>` : ''}
+                    </article>`).join('');
+            }
+
+            const ql = document.getElementById('studentQuestionList');
+            const empty = document.getElementById('studentQuestionEmpty');
+            const form = document.getElementById('quizForm');
+            const submitBtn = document.getElementById('submitQuizBtn');
+
+            if (!ql) return;
+
+            if (empty) empty.classList.toggle('hidden', questions.length > 0);
+            if (form) form.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.remove('hidden');
+
+            ql.innerHTML = questions.map((q, i) => `
+                <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                            <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 mb-2 inline-block">Soal ${i + 1}</span>
+                            <p class="text-sm font-semibold text-slate-800">${escapeHTML(q.text)}</p>
+                        </div>
+                        <span class="shrink-0 text-[10px] font-bold bg-white border border-slate-200 text-slate-500 px-2 py-1 rounded-full">Pilihan Ganda</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        ${['A','B','C','D'].map(letter => `
+                            <label class="flex items-center p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-amber-50 transition-all">
+                                <input type="radio" name="teacherQ_${escapeHTML(q.id)}" value="${letter}" class="accent-amber-600 mr-2" required>
+                                <span><strong>${letter}.</strong> ${escapeHTML(q[letter])}</span>
+                            </label>`).join('')}
+                    </div>
+                    <div class="mt-3 text-[10px] text-slate-400">Soal ini dibuat dan dikelola oleh guru.</div>
+                </div>`).join('');
+        }
+    </script>
+</body>
+</html>
